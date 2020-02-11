@@ -1,8 +1,8 @@
 <?php
     //Importacion de cabeseras
-    require('class/Cors.php');
+    include 'class/Cors.php';
     //Importacion de la conexion a la base de datos
-    require('class/MySQL.php');
+    include 'class/MySQL.php';
     //Intasncias
     $conn = new MySQL();
     $response = array();
