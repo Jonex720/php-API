@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.2
+-- version 5.0.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 11-02-2020 a las 04:01:57
+-- Servidor: localhost
+-- Tiempo de generación: 20-03-2020 a las 00:27:48
 -- Versión del servidor: 10.4.11-MariaDB
 -- Versión de PHP: 7.4.1
 
@@ -25,36 +25,44 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `tasks`
+-- Estructura de tabla para la tabla `task`
 --
 
-CREATE TABLE `tasks` (
-  `idTask` int(11) NOT NULL,
+CREATE TABLE `task` (
+  `Id` int(11) NOT NULL,
   `task` varchar(50) NOT NULL,
   `description` text NOT NULL,
-  `done` tinyint(1) DEFAULT 0,
-  `date_finish` date NOT NULL
+  `done` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `task`
+--
+
+INSERT INTO `task` (`Id`, `task`, `description`, `done`) VALUES
+(1, 'Read', 'I have to read in the morning', 0),
+(2, 'Read', 'I have to read in the morning', 0),
+(3, 'Web-Sites', 'I have to meke a web-sites', 0);
 
 --
 -- Índices para tablas volcadas
 --
 
 --
--- Indices de la tabla `tasks`
+-- Indices de la tabla `task`
 --
-ALTER TABLE `tasks`
-  ADD PRIMARY KEY (`idTask`);
+ALTER TABLE `task`
+  ADD PRIMARY KEY (`Id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT de la tabla `tasks`
+-- AUTO_INCREMENT de la tabla `task`
 --
-ALTER TABLE `tasks`
-  MODIFY `idTask` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `task`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

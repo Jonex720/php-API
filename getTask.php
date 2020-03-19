@@ -1,77 +1,84 @@
 <?php
-    //Importacion de las caveseras Cors
-    include 'class/Cors.php';
-    //Importacion de la conexion
-    include 'class/MySQL.php';
+//Importacion de clases y headers
+require_once "./class/headers.php";
+require_once "./class/MySQL.php";
 
-    //Intasncias
-    $conn = new MySQL();
-    $response = array();
-    $status = null;
+//Variables Globales
+$conn = new MySQL();
+$response = array();
+$jsonString = "";
+$verboHTTP = $_SERVER['REQUEST_METHOD'];
+$status = null;
 
-    //Ejecucion de la peticion GET
-    if ($_SERVER['REQUEST_METHOD'] === "GET") {
-        if (!empty($_GET)) {
-            //Se recupera el parametro por metodo GET y establesco la sentencias SQL
-            $idTask = $_GET['id'];
-            $sql = "SELECT * FROM tasks WHERE idTask = :idTask";
+//Revición de la petición HTTP sea correcta
+if ($verboHTTP === "GET") {
 
-            //Preparo la sentencia SQL y se cambia los parametros de la sentencia SQL
-            $state = $conn->getConnection()->prepare($sql);
-            $state->bindParam(':idTask', $idTask);
+    if (isset($_GET['idTask']) && !empty($_GET['idTask'])) {
+        //Se prepara la sentencia SQL junto con sus parametros
+        $idTask = $_GET['idTask'];
 
-            //Ejecuto la sentencia y veo que respuesta me trae.
-            if (!$state->execute()) {
-                //Si la sentencia regresa un error de sixtaxis y manda la respuesta
-                $status = 400;
-                    
-                http_response_code($status);
-                $response = array(
-                    "status" => $status,
-                    "message" => "The query is bad!",
-                    "response" => false
-                );
-            } else {
-                
-                $json = array();
-                while ($row = $state->fetch(PDO::FETCH_ASSOC)) {
-                    $json[] = array(
-                        "idTask" => $row['idTask'],
-                        "task" => $row['task'],
-                        "description" => $row['description'],
-                        "done" => $row['done'],
-                        "date_finish" => $row['date_finish']
-                    );
-                }
+        $sql = "SELECT * FROM task WHERE Id = :idTask";
+        $state = $conn->getConnection()->prepare($sql);
 
-                $response = array(
-                    "response" => true,
-                    "message" => "The query is well",
-                    "body" => $json
+        $state->bindParam(':idTask', $idTask);
+
+        //Se ejecuta la sentencia y valida si no ocurrio algun error.
+        if ($state->execute()) {
+            $json = array();
+
+            while ($row = $state->fetch(PDO::FETCH_ASSOC)) {
+                $json = array(
+                    "id" => $row['Id'],
+                    "task" => $row['task'],
+                    "description" => $row['description'],
+                    "done" => !$row['done'] ? false : true
                 );
             }
-        } else {
-            //Establesco el status del servidor
-            $status = 400;
-            //Establesco la respuesta del servidor
-            http_response_code($status);
+
+            //Establece la respuesta y el estado de la aplicación
+            $status = 200;
+
             $response = array(
                 "status" => $status,
-                "message" => "The http param is empty",
-                "response" => false
+                "resp" => true,
+                "message" => "Datos consultados satisfactoriamente!!",
+                "body" => $json
             );
+            http_response_code($status);
+        } else {
+            //Establece la respuesta y el estado de la aplicación
+            $status = 400;
+
+            $response = array(
+                "status" => $status,
+                "resp" => false,
+                "message" => "Error en la consulta de datos"
+            );
+            http_response_code($status);
         }
     } else {
-        //Establesco el status de la espuesta del servidor
-        $status = 400;
-        //Establesco la respuesta del servidor
-        http_response_code($status);
+        //Establece la respuesta y el estado de la aplicación
+        $status = 404;
+
         $response = array(
             "status" => $status,
-            "message" => "The http request is invalid",
-            "response" => false
+            "resp" => false,
+            "message" => "Parametro indefinido!!!"
         );
+        http_response_code($status);
     }
-    
-    $jsonString = json_encode($response);
-    echo $jsonString;
+} else {
+    //Establece la respuesta y el estado de la aplicación
+    $status = 404;
+
+    $response = array(
+        "status" => $status,
+        "resp" => false,
+        "message" => "El metodo HTTP es invalido!"
+    );
+    http_response_code($status);
+}
+
+//Se manda la Respuesta en json al Cliente de la aplicación
+$jsonString = json_encode($response);
+echo $jsonString;

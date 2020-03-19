@@ -1,67 +1,74 @@
 <?php
-    //Impostación de Cabeseras
-    include 'class/Cors.php';
-    //Impostacion de conexion
-    include 'class/MySQL.php';
-    //Instancias
-    $conn = new MySQL();
-    $response = array();
-    $status = null;
+//Importaciones
+require_once "./class/headers.php";
+require_once "./class/MySQL.php";
 
-    //Detecta si el metodo http es correcto
-    if ($_SERVER['REQUEST_METHOD'] === "POST") {
-        //Resivo los datos en formato json y los combierto a un array.
-        $body = json_decode(file_get_contents('php://input'), true);
-        //Compuevo si el cliente me manda los datos en formato json y si el cuerpo no esta basio
-        if (!empty($body)) {
-            $sql = "INSERT INTO tasks(task, description, date_finish) VALUE(:task, :description, :date_finish);";
-            $state = $conn->getConnection()->prepare($sql);
+//Variables Globales
+$conn = new MySQL();
+$response = array();
+$jsonString = "";
+$verboHTTP = $_SERVER['REQUEST_METHOD'];
+$status = null;
 
-            $state->bindParam(':task', $body['task']);
-            $state->bindParam(':description', $body['description']);
-            $state->bindParam(':date_finish', $body['date_finish']);
+//Revisión de la petición HTTP sea correcta
+if ($verboHTTP === "POST") {
+    //Se obtiene todo el cuerpo de la petición del cliente 
+    $body = json_decode(file_get_contents('php://input'), true);
 
-            if ($state->execute()) {
-                $status = 200;
-                //Establesco la respuesta del servidor
-                http_response_code($status);
-                $response = array(
-                    "status" => $status,
-                    "message" => "The query is well!!!",
-                    "response" => true,
-                );
-            } else {
-                $status = 400;
-                //Establesco la respuesta del servidor
-                http_response_code($status);
-                $response = array(
-                "status" => $status,
-                "message" => "The query is bad!!",
-                "response" => false
-            );
-            }
-        } else {
-            //Establesco el status de la espuesta del servidor
-            $status = 400;
-            //Establesco la respuesta del servidor
-            http_response_code($status);
+    //Se validan todos los datos para que no ocurra algun error de inserción
+    if (!empty($body) && isset($body['task']) && isset($body['description'])) {
+        //Se crea la sentencia SQL y se prepara todos los parametos para su ejecución
+        $sql = "INSERT INTO task(task, description) VALUE(:task, :description)";
+        $state = $conn->getConnection()->prepare($sql);
+        $state->bindParam(':task', $body['task']);
+        $state->bindParam(':description', $body['description']);
+
+        //Se verifica que la Sentencia SQL sea correacta y se ejecute correctamente
+        if ($state->execute()) {
+            //Establece la respuesta y el estado de la aplicación
+            $status = 200;
+
             $response = array(
                 "status" => $status,
-                "message" => "The body is empty",
-                "response" => false
+                "resp" => true,
+                "message" => "Todo salio correcto!!!"
             );
+            http_response_code($status);
+        } else {
+            //Establece la respuesta y el estado de la aplicación
+            $status = 400;
+
+            $response = array(
+                "status" => $status,
+                "resp" => false,
+                "message" => "Ocurrio un error el la inserción de los datos"
+            );
+            http_response_code($status);
         }
     } else {
-        //Establesco el status de la espuesta del servidor
-        $status = 400;
-        //Establesco la respuesta del servidor
-        http_response_code($status);
+        //Establece la respuesta y el estado de la aplicación
+        $status = 404;
+
         $response = array(
             "status" => $status,
-            "message" => "The http request is invalid",
-            "response" => false
+            "resp" => false,
+            "message" => "El cuerpo de la petición esta vacia o no se mandan los parametros correctos"
         );
+        http_response_code($status);
     }
+} else {
+    //Establece la respuesta y el estado de la aplicación
+    $status = 404;
 
-    $jsonString = json_encode($response);
-    echo $jsonString;
+    $response = array(
+        "status" => $status,
+        "resp" => false,
+        "message" => "El metodo HTTP es invalido!"
+    );
+    http_response_code($status);
+}
+
+//Se manda la Respuesta en json al Cliente de la aplicación
+$jsonString = json_encode($response);
+echo $jsonString;
+

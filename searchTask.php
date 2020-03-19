@@ -1,5 +1,5 @@
 <?php
-//Importaciones
+//Importacion de clases y headers
 require_once "./class/headers.php";
 require_once "./class/MySQL.php";
 
@@ -11,27 +11,38 @@ $verboHTTP = $_SERVER['REQUEST_METHOD'];
 $status = null;
 
 //Revición de la petición HTTP sea correcta
-if($verboHTTP === "PUT") {
-    //Se obtiene todo el cuerpo de la petición del cliente 
-    $body = json_decode(file_get_contents('php://input'), true);
+if ($verboHTTP === "GET") {
 
-    //Se validan todos los datos para que no ocurra algun error de actualización
-    if (!empty($body) && isset($body['task']) && isset($body['description']) && isset($body['id']) ) {
-        $sql = "UPDATE task SET task = :task , description = :description WHERE Id = :id;";
+    if (isset($_GET['task']) && !empty($_GET['task'])) {
+        //Se prepara la sentencia SQL junto con sus parametros
+        $idTask = $_GET['idTask'];
+
+        $sql = "SELECT * FROM task WHERE LIKE :idTask";
         $state = $conn->getConnection()->prepare($sql);
-        $state->bindParam(':task', $body['task']);
-        $state->bindParam(":description", $body['description']);
-        $state->bindParam(":id", $body['id']);
 
-        //Se verifica que la Sentencia SQL sea correacta y se ejecute correctamente
+        $state->bindParam(':idTask', "{$idTask}%");
+
+        //Se ejecuta la sentencia y valida si no ocurrio algun error.
         if ($state->execute()) {
+            $json = array();
+
+            while ($row = $state->fetch(PDO::FETCH_ASSOC)) {
+                $json = array(
+                    "id" => $row['Id'],
+                    "task" => $row['task'],
+                    "description" => $row['description'],
+                    "done" => !$row['done'] ? false : true
+                );
+            }
+
             //Establece la respuesta y el estado de la aplicación
             $status = 200;
 
             $response = array(
                 "status" => $status,
                 "resp" => true,
-                "message" => "Todo salio correcto!!!"
+                "message" => "Datos consultados satisfactoriamente!!",
+                "body" => $json
             );
             http_response_code($status);
         } else {
@@ -41,11 +52,10 @@ if($verboHTTP === "PUT") {
             $response = array(
                 "status" => $status,
                 "resp" => false,
-                "message" => "Ocurrio un error el la inserción de los datos"
+                "message" => "Error en la consulta de datos"
             );
             http_response_code($status);
         }
-
     } else {
         //Establece la respuesta y el estado de la aplicación
         $status = 404;
@@ -53,11 +63,10 @@ if($verboHTTP === "PUT") {
         $response = array(
             "status" => $status,
             "resp" => false,
-            "message" => "El cuerpo de la petición esta vacia o no se mandan los parametros correctos"
+            "message" => "Parametro indefinido!!!"
         );
         http_response_code($status);
     }
-
 } else {
     //Establece la respuesta y el estado de la aplicación
     $status = 404;
