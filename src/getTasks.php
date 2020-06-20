@@ -9,12 +9,22 @@ $response = array();
 $jsonString = "";
 $verboHTTP = $_SERVER['REQUEST_METHOD'];
 $status = null;
+$sql = "";
 
 //Revición de la petición HTTP sea correcta
 if ($verboHTTP === "GET") {
+    //Establesco la sentencia SQL dependiendo de los configuraciones que manden
+    if (isset($_GET['order'])) {
+        $sql = "SELECT * FROM task WHERE done=:settings ORDER BY Id DESC";
+    } else {
+        $sql = "SELECT * FROM task ORDER BY Id DESC";
+    }
+
     //Se prepara la sentencia SQL junto con sus parametros
-    $sql = "SELECT * FROM task";
     $state = $conn->getConnection()->prepare($sql);
+
+    //Se cambian los parametros en las sentencia SQL
+    $state->bindParam(':settings', $_GET['order']);
 
     //Se ejecuta la sentencia y valida si no ocurrio algun error.
     if ($state->execute()) {

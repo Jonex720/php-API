@@ -11,7 +11,7 @@ $verboHTTP = $_SERVER['REQUEST_METHOD'];
 $status = null;
 
 //Revición de la petición HTTP sea correcta
-if ($verboHTTP === "GET") {
+if ($verboHTTP === "DELETE") {
 
     if (isset($_GET['idTask']) && !empty($_GET['idTask'])) {
         //Se prepara la sentencia SQL junto con sus parametros
