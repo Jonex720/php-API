@@ -16,12 +16,13 @@ if ($verboHTTP === "POST") {
     $body = json_decode(file_get_contents('php://input'), true);
 
     //Se validan todos los datos para que no ocurra algun error de inserción
-    if (!empty($body) && isset($body['task']) && isset($body['description'])) {
+    if (!empty($body) && isset($body['task']) && isset($body['description']) && isset($body['delivery_Date'])) {
         //Se crea la sentencia SQL y se prepara todos los parametos para su ejecución
-        $sql = "INSERT INTO task(task, description) VALUE(:task, :description)";
+        $sql = "INSERT INTO task(task, description, delivery_Date) VALUE(:task, :description, :delivery)";
         $state = $conn->getConnection()->prepare($sql);
         $state->bindParam(':task', $body['task']);
         $state->bindParam(':description', $body['description']);
+        $state->bindParam(':delivery', $body['delivery_Date']);
 
         //Se verifica que la Sentencia SQL sea correacta y se ejecute correctamente
         if ($state->execute()) {

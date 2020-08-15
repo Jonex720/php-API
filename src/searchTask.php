@@ -27,6 +27,7 @@ if ($verboHTTP === "GET") {
                     "id" => $row['Id'],
                     "task" => $row['task'],
                     "description" => $row['description'],
+                    "delivery_Date" => $row['delivery_Date'],
                     "done" => !$row['done'] ? false : true
                 );
             }

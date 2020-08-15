@@ -16,11 +16,12 @@ if($verboHTTP === "PUT") {
     $body = json_decode(file_get_contents('php://input'), true);
 
     //Se validan todos los datos para que no ocurra algun error de actualización
-    if (!empty($body) && isset($body['task']) && isset($body['description']) && isset($body['id']) ) {
-        $sql = "UPDATE task SET task = :task , description = :description WHERE Id = :id;";
+    if (!empty($body) && isset($body['task']) && isset($body['description']) && isset($body['id']) && isset($body['delivery_Date'])) {
+        $sql = "UPDATE task SET task = :task , description = :description, delivery_Date = :delivary WHERE Id = :id;";
         $state = $conn->getConnection()->prepare($sql);
         $state->bindParam(':task', $body['task']);
         $state->bindParam(":description", $body['description']);
+        $state->bindParam(':delivary', $body['delivery_Date']);
         $state->bindParam(":id", $body['id']);
 
         //Se verifica que la Sentencia SQL sea correacta y se ejecute correctamente

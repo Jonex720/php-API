@@ -33,8 +33,9 @@ if ($verboHTTP === "GET") {
         while ($row = $state->fetch(PDO::FETCH_ASSOC)) {
             $json[] = array(
                 "id" => $row['Id'],
-                "task" => $row['task'],
+                "task" => $row['task'],  
                 "description" => $row['description'],
+                "delivery_Date" => $row['delivery_Date'],
                 "done" => !$row['done'] ? false : true
             );
         }
